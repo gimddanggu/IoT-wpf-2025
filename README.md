@@ -83,6 +83,17 @@ IoT 개발자 WPF 학습리포지토리 2025
 
     <img src="./image/wpf0004.png" width="600">
 
+- MVM 장단점
+    - View <-> ViewModel 간 데이터 자동 연동
+    - 로직 분리로 구조가 명확해짐. 자기 할 일만 하면 됨
+    - 팀으로 개발 시 역할 분담 확실. 팀 프로젝트에 알맞음 
+    - 테스트, 유지보수 쉬움
+    - 구조 복잡. 디버깅 어려움
+    - 스케일이 커짐
+
+
+
+
 ### WPF MVM 연습
 1. 프로젝트 생성 - [디자인](./day01/Day01Wpf/WpfBasicApp02/View/MainWindow.xaml), [소스](./day01/Day01Wpf/WpfBasicApp02/ViewModel/MainViewModel.cs)
 2. WPF DB바인딩 연습 시 사용한 UI 그대로 복사
@@ -93,7 +104,96 @@ IoT 개발자 WPF 학습리포지토리 2025
     - INotifyPropertyChanged 인터페이스 : 객체내의 어떠한 속성값이 변경되면 상태를 C#알려주는 기능
     - PropertyChangedEventHandler 이벤트 생성
 7. ViewModel 폴더 내 MainViewModel 클래스 생성
+    - INotifyPropertyChanged 인터페이스 구현
+    - OnPropertyChanged 이벤트 핸들러 메서드 코딩
+
+8. MainView.xaml에 ViewModel 연결
+    ```xml
+        xmlns:vm="clr-namespace:WpfBasicApp02.ViewModel"
+        DataContext="{DynamicResource MainVM}"
+        mc:Ignorable="d"
+        Title="MahApps DB연동(MVVM)" Height="350" Width="600">
+        <mah:MetroWindow.IconTemplate>
+            <DataTemplate>
+                <iconPacks:PackIconMaterial Kind="DatabaseCog" Margin="10,7,0,0" Foreground="White" />
+            </DataTemplate>
+        </mah:MetroWindow.IconTemplate>
+        <mah:MetroWindow.Resources>
+            <!-- MainViewModel을 가져와서 사용하겠다!! -->
+            <vm:MainViewModel x:Key="MainVM" />
+        </mah:MetroWindow.Resources>
+    ```
+
+9. MainView.xaml 컨트롤에 바인딩 작업
+    - 전총적인 C# 방식 : x:Name사용(비하인드 사용필요), 마우스이벤트 추가
+    ```xml
+    <!-- UI 컨트롤 구성 -->
+    <DataGrid x:Name="GrdBooks" 
+            Grid.Row="0" Grid.Column="0" Margin="5" 
+            AutoGenerateColumns="False" IsReadOnly="True" 
+            MouseDoubleClick="GrdBooks_MouseDoubleClick">
+        <DataGrid.Columns>
+            <DataGridTextColumn Binding="{Binding Idx}" Header="순번" />
+    ```
+
+    - WPF MVM 바인딩 방식 : 전부 Binding 사용
+    ```xml
+    <!-- UI 컨트롤 구성 -->
+    <DataGrid Grid.Row="0" Grid.Column="0" Margin="5" 
+            AutoGenerateColumns="False" IsReadOnly="True"
+            ItemsSource="{Binding Books}"
+            SelectedItem="{Binding SelectedBook, Mode=TwoWay}">
+        <DataGrid.Columns>
+            <DataGridTextColumn Binding="{Binding Idx}" Header="순번" />
+    ```
+10. 실행결과 
+
+<img src="./image/wpf0005.png" width="600">
 
 ## 2일차
+
+### MVM Framework
+- MVM 개발자체가 어려움. 초기 개발 시 MVM 템플릿을 만드는데 시간이 많이 소요. 난이도 있음
+- 조금 쉽게 개발하고자 3rd Party에서 개발한 MVM 프레임워크 사용
+- 종류
+    - `Prism` : MS계열에서 직접 개발. 대규모 앱 개발 시 사용. 모듈화 잘 되어 있음. 커뮤니티 활발
+        - 진입장벽 높음
+    - **`Caliburn.Micro`** : 경량화된 프레임워크. 쉽게 개발할 수 있음. Xaml 바인딩 생략가능. 
+        - [공식사이트](https://caliburnmicro.com/)
+        - [Github](https://github.com/Caliburn-Micro/Caliburn.Micro)
+        - MahApps.Metro에서 사용 중
+        - 디버깅이 어려움
+    - `MVM Light Toolkit` : 가장 가벼운 MVM 입문용. 쉬운 Command 지원. 개발종료.
+        - 확장성이 떨어짐
+    - CommunityToolkit.Mvm : MS 공식 경량 MVM. 단순, 빠름 커뮤니티등 매우 활발
+        - 모듈기능이 없음
+
+    - `ReactiveUI` : Rx기반 MVM. 비동기, 스트림처리 강력. 커뮤니티가 활발.
+        - 진입장벽 높음
+
+### Caliburn.Micro 학습
+1. WPF 프로젝트 생성
+2. NuGet 패키지 Caliburn.Micro 검색 후 설치
+3. App.xaml StartupUri를 삭제 - [소스](./day02/Day02Wpf/WpfBasicApp01/App.xaml)
+4. Model, View, ViewModel 폴더 생성
+5. MainViewModel 클래스 생성 - [소스](./day02/Day02Wpf/WpfBasicApp01/ViewModels/MainViewModel.cs)
+    - MainView의 속하는 ViewModel은 반드시 MainViewModel라는 이름을 써야 함
+6. MainWindow.xaml을 View로 이동
+7. MainWindow를 MainView로 이름 변경
+8. Bootstrapper 클래스 생성, 작성 - [소스](./day02/Day02Wpf/WpfBasicApp01/Bootstrapper.cs)
+9. App.xaml에서 Resource 추가
+10. MahApps.Metro UI 적용
+
+### Caliburn.Micro MVM 연습
+1. WPF 프로젝트 생성 - [소스](./day02/Day02Wpf/WpfBasicApp02/ViewModels/MainViewModel.cs)
+2. 필요 라이브러리 설치
+    - MySQL.Data
+    - MahApps.Metro
+    - MahApps.Metro.IconPacks
+    - Caliburn.Micro
+3. Models, Views, ViewModels로 폴더 생성
+4. 이전작업 소스코드 복사, 네임스페이스 변경
+
+<img src="./image/wpf0007.png" width="600">
 
 ## 3일차

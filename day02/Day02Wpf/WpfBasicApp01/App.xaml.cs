@@ -2,19 +2,13 @@
 using System.Data;
 using System.Windows;
 
-namespace WpfBasicApp02
+namespace WpfBasicApp01
 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {
-        private readonly Bootstrapper _bootstrapper;
-
-        public App()
-        {
-            _bootstrapper = new Bootstrapper();
-        }
     }
 
 }

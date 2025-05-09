@@ -9,12 +9,6 @@ namespace WpfBasicApp02
     /// </summary>
     public partial class App : Application
     {
-        private readonly Bootstrapper _bootstrapper;
-
-        public App()
-        {
-            _bootstrapper = new Bootstrapper();
-        }
     }
 
 }
