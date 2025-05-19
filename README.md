@@ -463,6 +463,10 @@ https://github.com/user-attachments/assets/2684ca36-ffd1-47fc-97de-fabe04352f9f
 
 
 
+    https://github.com/user-attachments/assets/c6bf8cae-a810-43ae-8d6b-1ade68b7d1a3
+
+
+
 ### 스마트홈 프로젝트 시작
 1. 화면 UI 변경
 2. NuGet 패키지
