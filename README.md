@@ -396,3 +396,7 @@ https://github.com/user-attachments/assets/2684ca36-ffd1-47fc-97de-fabe04352f9f
 4. UI 디자인 및 구현
 
 
+
+    https://github.com/user-attachments/assets/9919b234-c8d8-4917-9a31-c98d6f923a6a
+
+
