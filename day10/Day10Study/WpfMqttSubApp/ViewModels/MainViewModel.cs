@@ -13,6 +13,7 @@ namespace WpfMqttSubApp.ViewModels
 {
     public partial class MainViewModel : ObservableObject, IDisposable
     {
+        private readonly string TOPIC;
         private IMqttClient mqttClient;
         private readonly IDialogCoordinator dialogCoordinator;
         private readonly DispatcherTimer timer;
@@ -32,8 +33,9 @@ namespace WpfMqttSubApp.ViewModels
         {
             this.dialogCoordinator = coordinator;
 
-            BrokerHost = "210.119.12.62";
-            DatabaseHost = "210.119.12.62";
+            BrokerHost = "210.119.12.52";  // 강사PC로 변경
+            DatabaseHost = "210.119.12.62"; // 본인PC아이피 MySQL 서버 그대로
+            TOPIC = "pknu/sh01/data";
 
             connection = new MySqlConnection();  // 예외처리용 
 
@@ -77,12 +79,12 @@ namespace WpfMqttSubApp.ViewModels
                 .WithTcpServer(BrokerHost)
                 .WithCleanSession(true)
                 .Build();
-            // MQTT 접속 후 이벤트처리
+            // MQTT 접속 후 이벤트처리(람다식)
             mqttClient.ConnectedAsync += async e =>
             {
                 LogText += "MQTT 브로커 접속성공!\n";
                 // 연결 이후 구독(Subscribe)
-                await mqttClient.SubscribeAsync("smarthome/62/topic");
+                await mqttClient.SubscribeAsync(TOPIC);
             };
             // MQTT 구독메시지 로그출력
             mqttClient.ApplicationMessageReceivedAsync += e =>
@@ -91,8 +93,8 @@ namespace WpfMqttSubApp.ViewModels
                 var payload = e.ApplicationMessage.ConvertPayloadToString(); // byte 데이터를 UTF-8 문자열로 변환
 
                 // json으로 변경
-                var data = JsonConvert.DeserializeObject<FakeInfo>(payload);
-                Debug.WriteLine($"{data.Count} / {data.Sensing_Dt} / {data.Light} / {data.Humid} / {data.Human}");
+                var data = JsonConvert.DeserializeObject<SensingInfo>(payload);
+                Debug.WriteLine($"{data.L} / {data.R} / {data.T} / {data.H}");
 
                 SaveSensingData(data);
 
@@ -105,27 +107,28 @@ namespace WpfMqttSubApp.ViewModels
             await mqttClient.ConnectAsync(mqttClientOptions); // MQTT 서버에 접속
         }
 
-        private async Task SaveSensingData(FakeInfo data)
+
+        // DB 저장 메서드
+        private async Task SaveSensingData(SensingInfo data)
         {
-            string query = @"INSERT INTO fakedatas
-                                    (sensing_dt, pub_id, count,
-                                     temp, humid, light, human)
-                            VALUES
-                                    (@sensing_dt, @pub_id, @count, 
-                                     @temp, @humid, @light, @human)";
+            string query = @"INSERT INTO sensingdatas
+                                    (sensing_dt, light, rain, temp, humid, fan, vul, real_light, chaim_bell)
+                             VALUES
+                                    (now(), @light, @rain, @temp, @humid, @fan, @vul, @real_light, @chaim_bell);";
 
             try
             {
                 if (connection.State == System.Data.ConnectionState.Open)
                 {
                     using var cmd = new MySqlCommand(query, connection);
-                    cmd.Parameters.AddWithValue("@sensing_dt", data.Sensing_Dt);
-                    cmd.Parameters.AddWithValue("@pub_id", data.Pub_Id);
-                    cmd.Parameters.AddWithValue("@count", data.Count);
-                    cmd.Parameters.AddWithValue("@temp", data.Temp);
-                    cmd.Parameters.AddWithValue("@humid", data.Humid);
-                    cmd.Parameters.AddWithValue("@light", data.Light);
-                    cmd.Parameters.AddWithValue("@human", data.Human);
+                    cmd.Parameters.AddWithValue("@light", data.L);
+                    cmd.Parameters.AddWithValue("@rain", data.R);
+                    cmd.Parameters.AddWithValue("@temp", data.T);
+                    cmd.Parameters.AddWithValue("@humid", data.H);
+                    cmd.Parameters.AddWithValue("@fan", data.F);
+                    cmd.Parameters.AddWithValue("@vul", data.V);
+                    cmd.Parameters.AddWithValue("@real_light", data.RL);
+                    cmd.Parameters.AddWithValue("@chaim_bell", data.CB);
 
                     await cmd.ExecuteNonQueryAsync(); // 이전까지는 cmd.ExecuteNonQuery()
                 }

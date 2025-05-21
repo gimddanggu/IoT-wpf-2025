@@ -518,12 +518,28 @@ https://github.com/user-attachments/assets/2684ca36-ffd1-47fc-97de-fabe04352f9f
 
 ## 10일차
 
-
-
-
 ### 스마트홈 연동 모니터링앱 (계속)
 
 #### 스마트홈 기기 실제 IoT센서데이터 모니터링앱
+- 9일차 작성한 MQTT SubScribe 앱
+- SmartHome MQTT Json Key값
+    - L : Light 전등
+    - R : Rain(Water Drop Sensor)
+    - T : Temperature 온도
+    - H : Humidity 습도
+    - F : Fan 선풍기/에어컨
+    - V : Human Detection 침입감지 
+    - RL : Real Light 실제전등 커짐 여부
+    - CB : ChaimBell 벨푸시 여부
+
+- 실행화면 생략(9일차 화면 동일)
 
 #### 스마트홈 WPF 실시간 시각화
+- NuGet 패키지
+    - MQTT
+    - Newtonsoft.Json
+    - NLog
+- WpfMqttSubApp.Models의 SensingInfo.cs 가져오기
+- MQTT 센서 데이터로 동작용 변수 값 할당
+- 실행화면
 
